@@ -13,7 +13,7 @@ public class FolderAnalysis {
   /** Folder concerned by the analysis. */
   private File folder;
   /** Map of unique hashes with the first file that generated this hash. */
-  private Map<String, File> folderMap;
+  private Map<String, File> folderMap; // TODO Using a multimap to retain all duplicated files
   /** Map of all the files, including duplicates, with their hashes. */
   private Map<File, String> fileHashes;
 
