@@ -10,18 +10,30 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 
+/**
+ * This class logs errors and conflicts (duplicate elements) that happen during merging.
+ */
 public class Logger {
   private static final String ERROR_FILE_NAME = "errors";
-  private static final String DOUBLON_FILE_NAME = "doublons";
   private static final String CONFLICT_FILE_NAME = "conflicts";
 
+  /** File where to log errors. */
   private File errorLog;
+  /** File where to log duplicate elements. */
   private File conflictLog;
-  private File doublonLog;
+  /** Charset used to write in logs. */
   private Charset charset;
+  /** Determines whether logs should appear in console (<code>true</code>) or not (<code>false</code>). */
   private boolean showConsole;
 
 
+  /**
+   * Create a new Logger instance.
+   * @param logRoot Directory where to write logs.
+   * @param showConsole See {@link Logger#showConsole}
+   * @param clearPreviousLogs <code>true</code> if previous log files should be removed,
+   *                          <code>false</code> otherwise.
+   */
   public Logger(File logRoot, boolean showConsole, boolean clearPreviousLogs) {
     String timeMark = getTimeMark();
 
@@ -32,7 +44,6 @@ public class Logger {
     this.showConsole = showConsole;
     setCharset(StandardCharsets.UTF_8);
     errorLog = new File(logRoot, getFileName(ERROR_FILE_NAME, timeMark));
-    doublonLog = new File(logRoot, getFileName(DOUBLON_FILE_NAME, timeMark));
     conflictLog = new File(logRoot, getFileName(CONFLICT_FILE_NAME, timeMark));
   }
 
@@ -44,6 +55,9 @@ public class Logger {
     this.charset = charset;
   }
 
+  /**
+   * @param msg Error message to log.
+   */
   public void error(String msg) {
     try {
       Files.append(msg + "\n", errorLog, charset);
@@ -57,6 +71,10 @@ public class Logger {
     }
   }
 
+  /**
+   * @param msg Error message to log.
+   * @param ex Exception to log with the message.
+   */
   public void error(String msg, Exception ex) {
     error(msg);
 
@@ -74,6 +92,9 @@ public class Logger {
     }
   }
 
+  /**
+   * @param msg Message to log.
+   */
   public void conflict(String msg) {
     try {
       Files.append(msg + "\n", conflictLog, charset);
@@ -87,32 +108,34 @@ public class Logger {
     }
   }
 
-  public void doublon(String msg) {
-    try {
-      Files.append(msg + "\n", doublonLog, charset);
-
-      if (showConsole) {
-        System.out.println(msg);
-      }
-    }
-    catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
-
-  public void doublon(File file, File existingFile) {
+  /**
+   * @param file File in conflict.
+   * @param existingFile Existing file that caused the conflict.
+   */
+  public void conflict(File file, File existingFile) {
     String msg = file.getAbsolutePath() + " already exists in " + existingFile.getAbsolutePath();
-    doublon(msg);
+    conflict(msg);
   }
 
+  /**
+   * @param msg Message to log.
+   */
   public void info(String msg) {
     System.out.println(msg);
   }
 
-  private String getFileName(String fileName, String timeMark) {
-    return fileName + "-" + timeMark + ".txt";
+  /**
+   * @param logName Log name.
+   * @param timeMark Time mark used to make the file unique.
+   * @return Return the unique file name of the log.
+   */
+  private String getFileName(String logName, String timeMark) {
+    return logName + "-" + timeMark + ".txt";
   }
 
+  /**
+   * @return DateTime as a String.
+   */
   private String getTimeMark() {
     Calendar now = Calendar.getInstance();
     StringBuilder timeMark = new StringBuilder(23);
