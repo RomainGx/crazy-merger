@@ -100,6 +100,11 @@ public class Logger {
     }
   }
 
+  public void doublon(File file, File existingFile) {
+    String msg = file.getAbsolutePath() + " already exists in " + existingFile.getAbsolutePath();
+    doublon(msg);
+  }
+
   public void info(String msg) {
     System.out.println(msg);
   }
